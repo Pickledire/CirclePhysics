@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bouncy Boi Physics</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #222;
+      color: white;
+      font-family: monospace;
+    }
+    #bounceCounter {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 24px;
+      z-index: 10;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="bounceCounter">Bounces: 0</div>
+  <canvas id="myCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const bounceDisplay = document.getElementById('bounceCounter');
+    let bounceCount = 0;
+
+    const ball = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      radius: 25,
+      dx: 0,
+      dy: 0,
+      gravity: 0.5,
+      friction: 0.99,
+      bounce: 0.8
+    };
+
+    function updateBall() {
+      ball.dy += ball.gravity;
+      ball.dx *= ball.friction;
+
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+
+      // Bottom
+      if (ball.y + ball.radius > canvas.height) {
+        ball.y = canvas.height - ball.radius;
+        ball.dy *= -ball.bounce;
+        bounceCount++;
+      }
+
+      // Top
+      if (ball.y - ball.radius < 0) {
+        ball.y = ball.radius;
+        ball.dy *= -ball.bounce;
+        bounceCount++;
+      }
+
+      // Right
+      if (ball.x + ball.radius > canvas.width) {
+        ball.x = canvas.width - ball.radius;
+        ball.dx *= -ball.bounce;
+        bounceCount++;
+      }
+
+      // Left
+      if (ball.x - ball.radius < 0) {
+        ball.x = ball.radius;
+        ball.dx *= -ball.bounce;
+        bounceCount++;
+      }
+
+      bounceDisplay.textContent = `Bounces: ${bounceCount}`;
+    }
+
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff0000';
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBall();
+      updateBall();
+      requestAnimationFrame(animate);
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const angle = Math.atan2(e.y - ball.y, e.x - ball.x);
+      const force = 18 * Math.random() + 50;
+      ball.dx = Math.cos(angle) * force;
+      ball.dy = Math.sin(angle) * force;
+    });
+
+    animate();
+  </script>
+</body>
+</html>
